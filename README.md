@@ -3,6 +3,8 @@ template folder for the application of physics and equality constrained artifici
 
 Frequent changes would happens to improve the code and performance.
 
-Recent version is to test the consistency of prediction with uniform mesh instead of random collocation points.
-
 ## Codes can be executed by run.slurm or just main.py.
+Default: 3 independent networks representing u,v,p.
+
+uniform mesh Failed.
+Recent version is to test the consistency of prediction of 3 hidden layers and 40 neurons per layer with random collocation points.

@@ -166,24 +166,31 @@ domain   = np.array([[0.,0.],
 nu = torch.tensor(1/Re,device=device)
 
 epochs          = 2000
+optim_change = True
+optim_change_epoch = 0
+
 disp            = 10
 print_to_consol = True
 disp2           = 500
 
 trials          = 5
-layers = [2,20,20,20,20,20,20,1]
 
-dom_dis = [64,64]
-bc_dis  = [128,4]
-#n_dom = 4096
-#n_bc  = 128 # per side
+n_layers        = 4
+neurons         = 30
+layers = [2]
+for _ in range(n_layers):
+    layers.append(neurons)
+layers.append(1)
+
+#dom_dis = [100, 100]
+#bc_dis  = [128,4]
+n_dom = 10000
+n_bc  = 128 # per side
 
 num_lambda = 3
 para_adapt = ParaAdapt(zeta=0.99, omega=0.999,  
                         eta=torch.tensor([[1.],[1.], [0.01]]).to(device), epsilon=1e-16)
 
-optim_change = True
-optim_change_epoch = 0
 
 # In[25]:
 
@@ -191,7 +198,7 @@ optim_change_epoch = 0
 for trial in range(1, trials+1):
     print("*"*20 + f' run({trial}) '+"*"*20)
     model = modelling(domain, layers, device)
-    x_dm,y_dm, x_bc,y_bc = sampling(domain, dom_dis, bc_dis, device)
+    x_dm,y_dm, x_bc,y_bc = sampling(domain, n_dom, n_bc, device)
     printing_points(x_dm,y_dm, x_bc,y_bc, trial)
     # sample point to constrain pressure
     x_p,y_p    = torch.tensor([[0.5]],device=device),torch.tensor([[0.0]],device=device)

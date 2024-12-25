@@ -14,7 +14,7 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 dtype  = torch.float64
 
-'''
+
 def sample_collocation_points(domain,batch_size):
     dim      = domain.shape[0]
     soboleng = torch.quasirandom.SobolEngine(dimension=dim,scramble=True)
@@ -66,15 +66,15 @@ def sample_collocation_points(domain, dom_dis):
     y        = y.reshape(-1,1)
     return x,y
     
-##### boundary point distribution [128, 4]: 128 points per space side
+##### boundary point distribution [128, 4]: 130 points per space side
 def sample_boundary_points(domain, bc_dis):
     x_min    = domain[0][0]
     x_max    = domain[1][0]
     y_min    = domain[0][1]
     y_max    = domain[1][1]
 
-    x_unique = torch.linspace( x_min, x_max, bc_dis[0] )
-    y_unique = torch.linspace( y_min, y_max, bc_dis[0] )
+    x_unique = torch.linspace( x_min, x_max, bc_dis[0]+2 )[1:-1]
+    y_unique = torch.linspace( y_min, y_max, bc_dis[0]+2 )[1:-1]
 
     # x_min & x_max BC
     y_x      = y_unique.reshape(-1,1)
@@ -91,4 +91,4 @@ def sample_boundary_points(domain, bc_dis):
     return x,y
 
 
-    
+'''  

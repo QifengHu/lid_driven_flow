@@ -7,4 +7,4 @@ Frequent changes would happens to improve the code and performance.
 Default: 3 independent networks representing u,v,p.
 
 uniform mesh Failed.
-Recent version is to test the consistency of prediction of 3 hidden layers and 40 neurons per layer with random collocation points.
+Recent version is to test the consistency of prediction of 4 hidden layers and 30 neurons per layer with random collocation points.

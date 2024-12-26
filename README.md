@@ -14,3 +14,5 @@ Recent version is to test the consistency of prediction of 4 hidden layers and 3
   It works very consistently, for both 4096 and 10000 collocation points.
   
   The total model parameters are 8733.
+
+  Following this, we gonna test Re=400.

@@ -159,8 +159,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 dtype = torch.float64
 print(device)
 
-Re = 100 
-methodname = f'capu_lid_flow_Re{Re}'
+Re       = 100 
 domain   = np.array([[0.,0.],
                     [1.,1.]])
 nu = torch.tensor(1/Re,device=device)
@@ -184,13 +183,13 @@ layers.append(1)
 
 #dom_dis = [100, 100]
 #bc_dis  = [128,4]
-n_dom = 10000
+n_dom = 4096
 n_bc  = 128 # per side
 
 num_lambda = 3
 para_adapt = ParaAdapt(zeta=0.99, omega=0.999,  
                         eta=torch.tensor([[1.],[1.], [0.01]]).to(device), epsilon=1e-16)
-
+methodname = f'capu_lid_flow_Re{Re}_nn{n_layers}_{neurons}'
 
 # In[25]:
 
@@ -255,9 +254,9 @@ for trial in range(1, trials+1):
             print('epoch = %d, loss = %.3e, objective = %.3e, constraints = %.3e, %.3e, %.3e'%(epoch, loss, objective, constr[0], constr[1], constr[-1]))
         if epoch % disp2 == 0:
             printing(mu_evol, lambda_evol, constr_evol, object_evol)
-            torch.save(model.state_dict(),f"models/sap_nn_driven_flow_Re100_epoch_{epoch}.pt")
+            torch.save(model.state_dict(),f"models/{methodname}_{trial}_epoch_{epoch}.pt")
     
-    torch.save(model.state_dict(),f"sap_nn_driven_flow_Re100.pt")
+    torch.save(model.state_dict(),f"{methodname}_{trial}.pt")
     
     
     # ### plotting configuration

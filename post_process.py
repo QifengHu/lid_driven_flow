@@ -87,6 +87,7 @@ def contour_vel_mag(model, device, trial, methodname):
     
     up = up.reshape(x.shape).cpu()
     vp = vp.reshape(x.shape).cpu()
+    pp = pp.reshape(x.shape).cpu()
     
     plt.streamplot(x.numpy(),y.numpy(),
                       up.detach().numpy(),
@@ -109,6 +110,27 @@ def contour_vel_mag(model, device, trial, methodname):
     plt.savefig(f'pic/{methodname}_{trial}_contour_vel_mag.png',bbox_inches='tight', pad_inches=0.1)
     plt.close()
 
+    fig = plt.figure(figsize=(4,4))
+    gs = gridspec.GridSpec(1, 1)
+    ax = plt.subplot(gs[0,0])
+    max_val = torch.amax(pp.detach())
+    min_val = torch.amin(pp.detach())
+    pimg=plt.pcolormesh(x.numpy(),y.numpy(),
+                        pp.detach(),cmap=cmap,
+                        shading='gouraud')
+    colorbar(pimg, min_val = min_val,max_val= max_val,limit=0)
+    ax.axis('scaled')
+    ax.set_xlabel(r'$x$')
+    ax.set_ylabel(r'$y$')
+    ax.set_xticks(np.linspace(0,1,3))
+    ax.set_yticks(np.linspace(0,1,3))
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    fig.tight_layout()
+    plt.savefig(f'pic/{methodname}_{trial}_contour_pres.png',bbox_inches='tight', pad_inches=0.1)
+    plt.close()
+
+
 
 def plot_horiz_vel(model, device, trial, methodname):
     fig = plt.figure(figsize=(3,3))
@@ -125,7 +147,7 @@ def plot_horiz_vel(model, device, trial, methodname):
                 break
             line = line.strip()
             y.append(float(line.split()[0]))
-            u.append(float(line.split()[1]))
+            u.append(float(line.split()[3]))
     
     y = torch.tensor(y).reshape(-1,1)
     x = torch.full_like(y,0.5)
@@ -171,7 +193,7 @@ def plot_vert_vel(model, device, trial, methodname):
                 break
             line = line.strip()
             x.append(float(line.split()[0]))
-            v.append(float(line.split()[1]))
+            v.append(float(line.split()[3]))
     
     x = torch.tensor(x)
     v = torch.tensor(v)
@@ -200,53 +222,214 @@ def plot_update(trial, methodname):
     fig, ax = plt.subplots(figsize = (4,4))
     ax.plot(obj_s[:num_all,1], label=r'$\mathcal{J}$', linestyle=linestyles[0], color=colors[0],
             linewidth=2, marker=markers[0], markersize=5, markevery=num_all//10)
-    ax.plot(constr_s[:num_all,1], label=r'$\mathcal{C}_{P}$', linestyle=linestyles[1], color=colors[1],
+    ax.plot(constr_s[:num_all,1], label=r'$\mathcal{C}_{Bu}$', linestyle=linestyles[1], color=colors[1],
             linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
-    ax.plot(constr_s[:num_all,2], label=r'$\mathcal{C}_{B}$', linestyle=linestyles[2], color=colors[2],
+    ax.plot(constr_s[:num_all,2], label=r'$\mathcal{C}_{Bv}$', linestyle=linestyles[2], color=colors[1],
             linewidth=2, marker=markers[2], markersize=5, markevery=num_all//10)
-    ax.plot(constr_s[:num_all,3], label=r'$\mathcal{C}_{M}$', linestyle=linestyles[3], color=colors[3],
-            linewidth=2, marker=markers[3], markersize=5, markevery=num_all//10)
+    #ax.plot(constr_s[:num_all,3], label=r'$\mathcal{C}_{P_{anchor}}$', linestyle=linestyles[3], color=colors[1],
+    #        linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(constr_s[:num_all,3], label=r'$\mathcal{C}_{Mass}$', linestyle=linestyles[1], color=colors[2],
+            linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(constr_s[:num_all,4], label=r'$\mathcal{C}_{Momu}$', linestyle=linestyles[1], color=colors[3],
+            linewidth=2, marker=markers[2], markersize=5, markevery=num_all//10)
+    ax.plot(constr_s[:num_all,5], label=r'$\mathcal{C}_{Momv}$', linestyle=linestyles[2], color=colors[3],
+            linewidth=2, marker=markers[2], markersize=5, markevery=num_all//10)
     ax.set_xlabel('Epochs', fontsize=14)
     ax.set_ylabel('Losses', color='k')
     ax.semilogy()
     ax.set_ylim(1e-8, 1e0)
     ax.legend(prop={'size': 12}, frameon=False)
     plt.tight_layout()
-    #plt.grid()
+    plt.grid()
     plt.savefig(f'pic/{methodname}_{trial}_losses.png', dpi=300)
     plt.close()
 
     #Plot lambda & mu evolution
     fig, ax = plt.subplots(figsize = (4,4))
-    ax.plot(lambda_s[:num_all,1], label=r'$\lambda_{P}$', linestyle=linestyles[1], color=colors[1],
+    ax.plot(lambda_s[:num_all,1], label=r'$\lambda_{Bu}$', linestyle=linestyles[1], color=colors[1],
             linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
-    ax.plot(lambda_s[:num_all,2], label=r'$\lambda_{B}$', linestyle=linestyles[2], color=colors[2],
+    ax.plot(lambda_s[:num_all,2], label=r'$\lambda_{Bv}$', linestyle=linestyles[2], color=colors[1],
             linewidth=2, marker=markers[2], markersize=5, markevery=num_all//10)
-    ax.plot(lambda_s[:num_all,3], label=r'$\lambda_{M}$', linestyle=linestyles[3], color=colors[3],
-            linewidth=2, marker=markers[3], markersize=5, markevery=num_all//10)
+    #ax.plot(lambda_s[:num_all,3], label=r'$\lambda_{P_{anchor}}$', linestyle=linestyles[3], color=colors[1],
+    #        linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(lambda_s[:num_all,3], label=r'$\lambda_{Mass}$', linestyle=linestyles[1], color=colors[2],
+            linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(lambda_s[:num_all,4], label=r'$\lambda_{Momu}$', linestyle=linestyles[1], color=colors[3],
+            linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(lambda_s[:num_all,5], label=r'$\lambda_{Momv}$', linestyle=linestyles[2], color=colors[3],
+            linewidth=2, marker=markers[2], markersize=5, markevery=num_all//10)
     ax.set_xlabel('Epochs', fontsize=14)
     ax.set_ylabel('Lagrange Mult.', color='k')
     ax.semilogy()
     ax.legend(prop={'size': 12}, frameon=False)
     plt.tight_layout()
-    #plt.grid()
+    plt.grid()
     plt.savefig(f'pic/{methodname}_{trial}_lambda.png', dpi=300)
     plt.close()
 
     #Plot mu evolution
     fig, ax = plt.subplots(figsize = (4,4))
-    ax.plot(mu_s[:num_all,1], label=r'$\mu_{P}$', linestyle=linestyles[1], color=colors[1],
+    ax.plot(mu_s[:num_all,1], label=r'$\mu_{Bu}$', linestyle=linestyles[1], color=colors[1],
             linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
-    ax.plot(mu_s[:num_all,2], label=r'$\mu_{B}$', linestyle=linestyles[2], color=colors[2],
+    ax.plot(mu_s[:num_all,2], label=r'$\mu_{Bv}$', linestyle=linestyles[2], color=colors[1],
             linewidth=2, marker=markers[2], markersize=5, markevery=num_all//10)
-    ax.plot(mu_s[:num_all,3], label=r'$\mu_{M}$', linestyle=linestyles[3], color=colors[3],
-            linewidth=2, marker=markers[3], markersize=5, markevery=num_all//10)
+    #ax.plot(mu_s[:num_all,3], label=r'$\mu_{P_{anchor}}$', linestyle=linestyles[3], color=colors[1],
+    #        linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(mu_s[:num_all,3], label=r'$\mu_{Mass}$', linestyle=linestyles[1], color=colors[2],
+            linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(mu_s[:num_all,4], label=r'$\mu_{Momu}$', linestyle=linestyles[1], color=colors[3],
+            linewidth=2, marker=markers[1], markersize=5, markevery=num_all//10)
+    ax.plot(mu_s[:num_all,5], label=r'$\mu_{Momv}$', linestyle=linestyles[2], color=colors[3],
+            linewidth=2, marker=markers[2], markersize=5, markevery=num_all//10)
     ax.set_xlabel('Epochs', fontsize=14)
     ax.set_ylabel('Penalty Para.', color='k')
     ax.semilogy()
     ax.legend(prop={'size': 12}, frameon=False)
     plt.tight_layout()
-    #plt.grid()
+    plt.grid()
     plt.savefig(f'pic/{methodname}_{trial}_mu.png', dpi=300)
+    plt.close()
+
+
+
+# In[29]:
+
+def contour_vel_mag2(model2,model, device, trial, methodname):
+    fig = plt.figure(figsize=(4,4))
+    gs = gridspec.GridSpec(1, 1)
+
+    ax = plt.subplot(gs[0,0])
+
+    x = torch.linspace(0,1,128)
+    y = torch.linspace(0,1,128)
+
+    x,y = torch.meshgrid(x,y,indexing='xy')
+
+    up1,vp1,_ = model(x.reshape(-1,1).to(device),y.reshape(-1,1).to(device))
+    up2,vp2,_ = model2(x.reshape(-1,1).to(device),y.reshape(-1,1).to(device))    
+
+    up = (up1+up2).reshape(x.shape).cpu()
+    vp = (vp1+vp2).reshape(x.shape).cpu()
+
+    velocity = (up.detach().pow(2) + vp.detach().pow(2)).sqrt()
+
+    max_val = 1.0 #torch.amax(velocity)
+    min_val = 0.0 #torch.amin(velocity)
+
+    pimg=plt.pcolormesh(x.numpy(),y.numpy(),
+                        velocity,cmap=cmap,
+                        shading='gouraud',
+                        vmin=min_val,
+                        vmax=max_val)
+
+    colorbar(pimg,min_val = min_val,max_val= max_val,limit=-1)
+    ax.axis('scaled')
+
+    x = torch.linspace(0,1,256)
+    y = torch.linspace(0,1,256)
+
+    x,y = torch.meshgrid(x,y,indexing='xy')
+
+    up1,vp1,_ = model(x.reshape(-1,1).to(device),y.reshape(-1,1).to(device))
+    up2,vp2,_ = model2(x.reshape(-1,1).to(device),y.reshape(-1,1).to(device))
+
+    up = (up1+up2).reshape(x.shape).cpu()
+    vp = (vp1+vp2).reshape(x.shape).cpu()
+
+    plt.streamplot(x.numpy(),y.numpy(),
+                      up.detach().numpy(),
+                      vp.detach().numpy(),
+                      density=2.,
+                      arrowsize=0.5,
+                      arrowstyle='->',
+                      color='w',
+                      linewidth=0.5,
+                      cmap=cmap)
+    ax.axis('scaled')
+    ax.set_xlabel(r'$x$')
+    ax.set_ylabel(r'$y$')
+    ax.set_xticks(np.linspace(0,1,3))
+    ax.set_yticks(np.linspace(0,1,3))
+
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    fig.tight_layout()
+    plt.savefig(f'pic/{methodname}_{trial}_l2_contour_vel_mag.png',bbox_inches='tight', pad_inches=0.1)
+    plt.close()
+
+def plot_horiz_vel2(model2,model, device, trial, methodname):
+    fig = plt.figure(figsize=(3,3))
+    gs = gridspec.GridSpec(1, 1)
+
+    ax = plt.subplot(gs[0,0])
+
+    y = []
+    u = []
+    with open('benchmarks/ghiau.txt') as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            line = line.strip()
+            y.append(float(line.split()[0]))
+            u.append(float(line.split()[2]))
+
+    y = torch.tensor(y).reshape(-1,1)
+    x = torch.full_like(y,0.5)
+    u = torch.tensor(u).reshape(-1,1)
+
+    # prediction from the model
+    y_ = torch.linspace(0,1,256)[:,None]
+    x_ = torch.full_like(y_,0.5)
+    up1,_,_= model(x_.to(device),y_.to(device))
+    up2,_,_= model2(x_.to(device),y_.to(device))
+    up     = up1+up2
+
+    ax.plot(up.cpu().detach().numpy(),y_,"m",linewidth=3,label='Predicted')
+    ax.plot(u,y,'xk',label="Ghia et al.",markersize=6)
+    ax.set_xlabel('$u(0.5,y)$')
+    ax.set_ylabel('$y$')
+    ax.set_yticks([0,0.5,1])
+    ax.set_xticks([-0.5,0.5,0.5,1])
+    ax.legend(frameon=False,fontsize=12)
+    plt.savefig(f'pic/{methodname}_{trial}_l2_plot_verif_horiz_vel.png',bbox_inches='tight', pad_inches=0.1)
+    plt.close()
+
+
+def plot_vert_vel2(model2,model, device, trial, methodname):
+    fig = plt.figure(figsize=(3,3))
+    gs = gridspec.GridSpec(1, 1)
+
+    ax = plt.subplot(gs[0,0])
+
+    # model
+    x = torch.linspace(0,1,256)[:,None]
+    y = torch.full_like(x,0.5)
+    _,vp1,_= model(x.to(device),y.to(device))
+    _,vp2,_= model2(x.to(device),y.to(device))
+    vp = vp1+vp2
+
+    ax.plot(x,vp.cpu().detach(),"m",linewidth=3,label="Predicted")
+
+    x = []
+    v = []
+    with open('benchmarks/ghiav.txt') as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            line = line.strip()
+            x.append(float(line.split()[0]))
+            v.append(float(line.split()[2]))
+
+    x = torch.tensor(x)
+    v = torch.tensor(v)
+    ax.plot(x,v,'xk',label='Ghia et al.',markersize=6)
+    ax.set_xlabel('$x$')
+    ax.set_ylabel('$v(x,0.5)$')
+    ax.set_yticks([-0.3,0,0.3])
+    ax.set_xticks([-0,0.5,1.0])
+    ax.legend(frameon=False,fontsize=12)
+    plt.savefig(f'pic/{methodname}_{trial}_l2_plot_verif_vert_vel.png',bbox_inches='tight', pad_inches=0.1)
     plt.close()
 

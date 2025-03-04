@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=test
 #SBATCH --cluster=gpu
-#SBATCH --partition=l40s
+#SBATCH --partition=isenocak
 #SBATCH --nodes=1                # node count
 #SBATCH --gres=gpu:1     
-#SBATCH --mem=256G                # total memory per node (4 GB per cpu-core is default)
-#SBATCH --time=04-00:00:00          # total run time limit (HH:MM:SS)
-#SBATCH --qos=short
+#SBATCH --cpus-per-task=1            # Request only 1 CPU
+#SBATCH --mem=16G                # total memory per node (4 GB per cpu-core is default)
+#SBATCH --time=03-00:00:00          # total run time limit (HH:MM:SS)
 #SBATCH --error=job.%J.err
 #SBATCH --output=job.%J.out
 
@@ -35,6 +35,6 @@ else
     echo "mpi4py is already installed."
 fi
             
-mpirun --np 1 python -u main.py
+mpirun --oversubscribe --np 1 python -u main.py
 #mpirun --oversubscribe --np 25 --bind-to core -map-by socket:PE=1 --report-bindings python -u main.py
 
